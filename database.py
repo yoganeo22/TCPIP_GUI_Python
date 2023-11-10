@@ -54,27 +54,3 @@ def display_data(fileName, query):
         if conn:
             # always close connection after usage.
             conn.close()
-
-
-if __name__ == "__main__":
-    createConnection(r"sqlfile.db")
-
-    #sqlQueryCommand(r"sqlfile.db", '''DROP table Products''')
-
-    #sqlQueryCommand(r"sqlfile.db", '''
-    #                    CREATE TABLE IF NOT EXISTS Products ([product_id] INTEGER PRIMARY KEY,
-    #                       [product_name] TEXT)
-    #                    ''')
-    
-    # insert data
-    #data = ''' (1,'Fruits'),
-    #           (2,'Vegetables')
-    #       '''
-    #sqlQueryCommand(r"sqlfile.db", '''INSERT INTO Products (product_id, product_name) VALUES ''' + data)
-
-    # display the results
-    #display_data(r"sqlfile.db", '''
-    #              SELECT
-    #                a.product_name
-    #                FROM Products a
-    #              ''')
