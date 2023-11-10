@@ -1,6 +1,7 @@
 import socket
 import threading
 import PySimpleGUI as psg
+import database as db
 
 # Right column
 log_column = [
@@ -33,9 +34,10 @@ server.bind(ADDR)
 # then get received message
 def handle_client(conn, addr):
     try:
+        msg_id = 1
         print(f"[NEW CONNECTION] {addr} connected.")
         existingText = window['-LOG OUTPUT-']
-        window['-LOG OUTPUT-'].update(existingText.get() + f"[NEW CONNECTION] {addr} connected." + "\n")
+        window['-LOG OUTPUT-'].update(existingText.get() + f"[NEW CONNECTION] connected." + "\n")
         connected = True
         while connected:
             msg_length = conn.recv(BUFFER_SIZE).decode(FORMAT)
@@ -46,14 +48,15 @@ def handle_client(conn, addr):
                 # if client disconnect, close connection. 
                 if msg == DISCONNECT_MESSAGE:
                     connected = False
-                    #existingText = window['-LOG OUTPUT-']
-                    #window['-LOG OUTPUT-'].update(existingText.get() + msg + "\n")
                     break
                 print(f"[{addr}] {msg}")
                 existingText = window['-LOG OUTPUT-']
-                window['-LOG OUTPUT-'].update(existingText.get() + f"[{addr}] {msg}" + "\n")
+                window['-LOG OUTPUT-'].update(existingText.get() + f"[Message] {msg}" + "\n")
+                db.sqlQueryCommand(r"sqlfile.db", '''INSERT INTO MessageLogs (id, recv_message) VALUES (''' + str(msg_id) + ''',\'''' + msg + '''\')''')
+                msg_id += 1
                 conn.send("Server sent - Msg received!".encode(FORMAT))
     finally:
+        db.sqlQueryCommand(r"sqlfile.db", '''DROP table MessageLogs''')
         conn.close()
 
 # server starts listening
@@ -68,6 +71,11 @@ def start():
             break
 
         if event == 'Start':
+            db.createConnection(r"sqlfile.db")
+            db.sqlQueryCommand(r"sqlfile.db", '''
+                CREATE TABLE IF NOT EXISTS MessageLogs ([id] INTEGER PRIMARY KEY,
+                    [recv_message] TEXT)
+                    ''')
             conn, addr = server.accept()
             thread = threading.Thread(target=handle_client, args=(conn,addr))
             thread.start()
