@@ -34,17 +34,23 @@ BUFFER_SIZE = 64
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    # byte representation of string
-    send_length += b' ' * (BUFFER_SIZE - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    received_message = client.recv(2048).decode(FORMAT)
-    existingText = window['-LOG OUTPUT-']
-    window['-LOG OUTPUT-'].update(existingText.get() + received_message + "\n")
+class ClientSide:
+    def msgFormat(self, msg):
+        message = msg.encode(FORMAT)
+        msg_length = len(message)
+        send_length = str(msg_length).encode(FORMAT)
+        # byte representation of string
+        send_length += b' ' * (BUFFER_SIZE - len(send_length))
+        return (send_length, message)
+    
+    def sendFunc(self, msg):
+        send_length, message = self.msgFormat(msg)
+        client.send(send_length)
+        client.send(message)
+        print(f"message: {message}, send_length: {send_length}")
+        received_message = client.recv(2048).decode(FORMAT)
+        existingText = window['-LOG OUTPUT-']
+        window['-LOG OUTPUT-'].update(existingText.get() + received_message + "\n")
 
 # Display and interact with the Window using an Event Loop
 while True:
@@ -61,7 +67,8 @@ while True:
         pass
 
     if event == "Send":
-        send(values['-INPUT-'])
+        cs = ClientSide()
+        cs.sendFunc(values['-INPUT-'])
         
 # Finish up by removing from the screen
 window.close()
