@@ -35,6 +35,9 @@ FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
 class ClientSide:
+    def __init__(self, client):
+        self.client = client
+
     def msgFormat(self, msg):
         message = msg.encode(FORMAT)
         msg_length = len(message)
@@ -43,31 +46,34 @@ class ClientSide:
         send_length += b' ' * (BUFFER_SIZE - len(send_length))
         return (send_length, message)
     
+    def connectFunc(self, ip, port):
+        ADDR = (ip, port)
+        self.client.connect(ADDR)
+
     def sendFunc(self, msg):
         send_length, message = self.msgFormat(msg)
-        client.send(send_length)
-        client.send(message)
+        self.client.send(send_length)
+        self.client.send(message)
         print(f"message: {message}, send_length: {send_length}")
-        received_message = client.recv(2048).decode(FORMAT)
+        received_message = self.client.recv(2048).decode(FORMAT)
         existingText = window['-LOG OUTPUT-']
         window['-LOG OUTPUT-'].update(existingText.get() + received_message + "\n")
+        return received_message
 
 # Display and interact with the Window using an Event Loop
 while True:
     event, values = window.read()
     # See if user wants to quit or window was closed
     if event == psg.WINDOW_CLOSED or event == 'Quit':
-        client.close()
+        #client.close()
         break
 
     if event == "Connect":
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ADDR = (values['-SERVER IP-'], int(values['-SERVER PORT-']))
-        client.connect(ADDR)
-        pass
+        cs = ClientSide(client)
+        cs.connectFunc(values['-SERVER IP-'], int(values['-SERVER PORT-']))
 
     if event == "Send":
-        cs = ClientSide()
         cs.sendFunc(values['-INPUT-'])
         
 # Finish up by removing from the screen
