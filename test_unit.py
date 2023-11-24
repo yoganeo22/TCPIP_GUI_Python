@@ -1,15 +1,24 @@
 import pytest
 from client import ClientSide
 from database import db
+import socket
 
 FILENAME = r"sqlfile.db"
 
 class TestClient:
     def test_msgFormat(self):
-        cs = ClientSide()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cs = ClientSide(client)
         send_length, msg = cs.msgFormat("Hello")
         assert send_length == b'5                                                               '
         assert msg == b'Hello'
+
+    def test_sendFunc(self):
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cs = ClientSide(client)
+        cs.connectFunc('192.168.50.81', 5050)
+        received_message = cs.sendFunc("Hello")
+        assert received_message == "Server sent - Msg received!"
 
 class TestDatabase:
     def test_sqlQueryCommandReturnZero(self):

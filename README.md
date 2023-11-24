@@ -24,3 +24,6 @@ python -m pip install pysimplegui
 
 ## Screenshot
 ![screenshot](https://github.com/yoganeo22/TCPIP_GUI_Python/assets/94224851/e73fb723-89b0-4a46-aed4-d5c8954a5953)
+
+Run pytest. 
+![run_pytest_image](https://github.com/yoganeo22/TCPIP_GUI_Python/assets/94224851/d1cbe691-1485-48ff-95e3-7f52f6c27906)
